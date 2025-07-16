@@ -6,16 +6,18 @@ INPUT_DIR = "/app/input"
 OUTPUT_DIR = "/app/output"
 
 def log(msg):
-    print(f"[{time.strftime('%H:%M:%S')}] {msg}")
+    print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
 def run_command(command, description):
     log(f"🔹 {description}")
     log(f"   └─ Команда: {' '.join(command)}")
     try:
-        subprocess.run(command, check=True)
+        subprocess.run(command, check=True, capture_output=True, text=True)
         log("   ✅ Успешно")
     except subprocess.CalledProcessError as e:
         log(f"   ❌ Ошибка при выполнении: {e}")
+        log(f"   Вывод: {e.stdout}")
+        log(f"   Ошибка: {e.stderr}")
         raise
 
 def process_file(input_path):
@@ -32,14 +34,14 @@ def process_file(input_path):
         "Конвертация .ai в .svg"
     )
 
-    # Шаг 2: SVG дорисовка 1 мм по краям
+    # Шаг 2: Дорисовка 1 мм по всем сторонам
     run_command(
         [
             "inkscape", temp_svg,
-            "--actions=select-all;duplicate;move:1mm,0;duplicate;move:0,1mm",
+            "--actions=select-all;duplicate;move:-1mm,0;select-all;duplicate;move:1mm,0;select-all;duplicate;move:0,-1mm;select-all;duplicate;move:0,1mm",
             f"--export-plain-svg={output_svg}"
         ],
-        "Дорисовка краёв и экспорт .svg"
+        "Дорисовка краёв (1 мм во все стороны) и экспорт .svg"
     )
 
     # Шаг 3: SVG → PDF (опционально)

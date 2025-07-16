@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   autopaint:
     build:
@@ -9,3 +7,5 @@ services:
       - ./input:/app/input
       - ./output:/app/output
     restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
